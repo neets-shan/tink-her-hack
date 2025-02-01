@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing URL Detector</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #ff99cc, #66ccff);
+      background-size: 100% 100%;
+      background-attachment: fixed;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 540px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      margin: 12px 0;
+      font-size: 16px;
+      background-color: #2f3355;
+      color: #ffffff;
+    }
+
+    button {
+      padding: 16px;
+      border: none;
+      background-color: #ff7e5f;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: background-color 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #e3704f;
+      transform: translateY(-3px);
+    }
+
+    .result {
+      margin-top: 24px;
+      font-size: 20px;
+      display: none;
+    }
+
+    .result.legitimate {
+      color: #27ae60;
+    }
+
+    .result.phishing {
+      color: #ff4d4d;
+    }
+
+    .result.error {
+      color: #e74c3c;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Phishing URL Detector</h2>
+    <form id="phishingForm">
+      <input type="text" id="url" placeholder="Enter suspicious URL" required>
+      <button type="submit">Check Legitimacy</button>
+    </form>
+    <p id="result" class="result"></p>
+  </div>
+
+  <script>
+    document.getElementById("phishingForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const url = document.getElementById("url").value;
+      const resultElement = document.getElementById("result");
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) throw new Error("Network response was not ok");
+
+        const data = await response.json();
+        resultElement.innerText = `Prediction: ${data.prediction}`;
+        resultElement.className = `result ${data.prediction === "legitimate" ? "legitimate" : "phishing"}`;
+        resultElement.style.display = "block";
+      } catch (error) {
+        resultElement.innerText = "Error: Unable to fetch prediction.";
+        resultElement.className = "result error";
+        resultElement.style.display = "block";
+      }
+    });
+  </script>
+</body>
+
+</html>
